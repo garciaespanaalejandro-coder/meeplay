@@ -12,10 +12,8 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "sesiones")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+//lombok anotations
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Sesion {
 
     @Id

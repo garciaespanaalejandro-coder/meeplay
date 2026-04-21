@@ -1,12 +1,11 @@
 package com.wintam.service;
 
-import com.wintam.dto.AuthResponse;
-import com.wintam.dto.LoginRequest;
-import com.wintam.dto.MessageResponse;
-import com.wintam.dto.RegisterRequest;
+import com.wintam.dto.*;
 
 public interface AuthService {
     public MessageResponse createAccount(RegisterRequest request);
     public AuthResponse signInAccount(LoginRequest request);
-
+    AuthResponse verifyEmail(VerifiyRequest request);
+    public MessageResponse recoverPassword(RecoverRequest request);
+    public MessageResponse resetPassword(ResetPasswordRequest request);
 }

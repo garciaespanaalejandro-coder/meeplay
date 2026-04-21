@@ -1,11 +1,7 @@
 package com.wintam.service;
 
-import com.wintam.dto.AuthResponse;
-import com.wintam.dto.LoginRequest;
-import com.wintam.dto.MessageResponse;
-import com.wintam.dto.RegisterRequest;
-import com.wintam.exception.EmailNotVerifiedException;
-import com.wintam.exception.UserNotFoundException;
+import com.wintam.dto.*;
+import com.wintam.exception.*;
 import com.wintam.model.User;
 import com.wintam.repository.UserRepository;
 import com.wintam.security.JwtService;
@@ -16,28 +12,48 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthServiceSpring implements AuthService{
     private final UserRepository user;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-
+    private final EmailService emailService;
     @Autowired
-    public AuthServiceSpring(UserRepository user,PasswordEncoder passwordEncoder,AuthenticationManager authenticationManager,JwtService jwtService) {
+    public AuthServiceSpring(UserRepository user, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, EmailService emailService) {
         this.user = user;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
-
-    //TODO comprobar que varios usuarios no puedan registrarse(gracias javi) con el mismo mail
 
     @Override
     @Transactional()
     public MessageResponse createAccount(RegisterRequest request) {
+        if(user.existsByEmail(request.getEmail())){
+            throw new EmailAlreadyExistsException(request.getEmail());
+        }
+        if (user.findByUsername(request.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException(request.getUsername());
+        }
 
-        return null;
+        String code = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        User user1=  User.builder()
+                .name(request.getName())
+                .surname(request.getSurname())
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .birthdate(request.getBirthdate())
+                .verificationCode(code)
+                .build();
+        user.save(user1);
+        emailService.sendVerificationEmail(request.getEmail(), code);
+        return new MessageResponse("Cuenta creada. Revisa tu correo para verificarla.");
     }
 
     @Override
@@ -56,7 +72,38 @@ public class AuthServiceSpring implements AuthService{
 
         return new AuthResponse(token, user1.getEmail(), user1.getUsername(), user1.getRole().name());
     }
-    public boolean checkPassword(String rawPassword, String encodedPassword) {
-        return rawPassword.equals(encodedPassword);
+
+    @Override
+    @Transactional
+    public AuthResponse verifyEmail(VerifiyRequest request) {
+
+        User usuario = user.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException(request.getEmail()));
+
+        if (usuario.getIsVerified()) {
+            throw new AccountAlreadyVerifiedException(request.getEmail());
+        }
+
+        if (!usuario.getVerificationCode().equals(request.getCode())) {
+            throw new InvalidCodeException();
+        }
+
+        usuario.setIsVerified(true);
+        usuario.setVerificationCode(null);
+        user.save(usuario);
+
+        String token = jwtService.generateToken(usuario);
+        return new AuthResponse(token, usuario.getEmail(), usuario.getUsername(), usuario.getRole().name());
     }
+
+    @Override
+    public MessageResponse recoverPassword(RecoverRequest request) {
+        return null;
+    }
+
+    @Override
+    public MessageResponse resetPassword(ResetPasswordRequest request) {
+        return null;
+    }
+
 }

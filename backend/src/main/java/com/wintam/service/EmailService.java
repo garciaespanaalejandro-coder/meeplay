@@ -25,7 +25,7 @@ public class EmailService {
         message.setTo(email);
         message.setSubject("Wintam- Recupera tu contraseña");
         message.setText("Tu código para recuperar la contraseña es: "+code+
-                "+\n\n Introdúcelo en la app para cambiar tu contraseña."+
+                "\n\n Introdúcelo en la app para cambiar tu contraseña."+
                 "\n Este código expirará en 24 horas.");
         mailSender.send(message);
     }

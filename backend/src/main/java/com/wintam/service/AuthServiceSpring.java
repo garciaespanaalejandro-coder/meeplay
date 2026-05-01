@@ -115,6 +115,9 @@ public class AuthServiceSpring implements AuthService{
         if (!usuario.getVerificationCode().equals(request.getCode())){
             throw new InvalidCodeException();
         }
+        if(request.getNewPassword().length()<6){
+            throw new InvalidNewPassword();
+        }
 
         usuario.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
 

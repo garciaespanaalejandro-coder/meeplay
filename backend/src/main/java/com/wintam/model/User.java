@@ -67,6 +67,7 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
     @Override public String getPassword() { return passwordHash; }
-    @Override public String getUsername() { return email; }
+
+    @Override public String getUsername() { return username; }
     @Override public boolean isEnabled() { return isVerified; }
 }

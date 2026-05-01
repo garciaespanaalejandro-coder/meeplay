@@ -39,13 +39,11 @@ public class SecurityConfig {
                         // ── Rutas PÚBLICAS ──────────────────────────────────────────
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/register",
-                                "/api/auth/login",
-                                "/api/auth/verify"
+                                "/api/auth/signIn",
+                                "/api/auth/verify",
+                                "/api/auth/recover-password",
+                                "/api/auth/reset-password"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/auth/recover-password"
-                        ).permitAll()
-
                         // ── Rutas solo para ADMIN ───────────────────────────────────
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

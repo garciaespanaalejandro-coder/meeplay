@@ -1,9 +1,6 @@
 package com.wintam.controller;
 
-import com.wintam.dto.AuthResponse;
-import com.wintam.dto.LoginRequest;
-import com.wintam.dto.MessageResponse;
-import com.wintam.dto.RegisterRequest;
+import com.wintam.dto.*;
 import com.wintam.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -32,5 +29,20 @@ public class AuthRestController {
     @PostMapping("/signIn")
     public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody LoginRequest loginRequest){
         return ResponseEntity.status(HttpStatus.OK).body(authService.signInAccount(loginRequest));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<AuthResponse> verify(@Valid @RequestBody VerifiyRequest verifiyRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(authService.verifyEmail(verifiyRequest));
+    }
+
+    @PostMapping("/recover-password")
+    public ResponseEntity<MessageResponse> recoverPassword(@Valid @RequestBody RecoverRequest recoverRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(authService.recoverPassword(recoverRequest));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(authService.resetPassword(resetPasswordRequest));
     }
 }
